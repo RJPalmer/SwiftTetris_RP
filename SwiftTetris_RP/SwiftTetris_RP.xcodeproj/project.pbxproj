@@ -29,9 +29,36 @@
 		30D438802DA831490032CE3A /* SwiftTetris_RPUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SwiftTetris_RPUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		30D438992DA83F190032CE3A /* Exceptions for "SwiftTetris_RP" folder in "SwiftTetris_RPTests" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Animate_LaunchScreen.storyboard,
+				LaunchScreenViewController.swift,
+				MainMenuViewController.swift,
+				SplashView.swift,
+			);
+			target = 30D438752DA831490032CE3A /* SwiftTetris_RPTests */;
+		};
+		30D4389A2DA83F190032CE3A /* Exceptions for "SwiftTetris_RP" folder in "SwiftTetris_RPUITests" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Animate_LaunchScreen.storyboard,
+				LaunchScreenViewController.swift,
+				MainMenuViewController.swift,
+				SplashView.swift,
+			);
+			target = 30D4387F2DA831490032CE3A /* SwiftTetris_RPUITests */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		30D4385F2DA831460032CE3A /* SwiftTetris_RP */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				30D438992DA83F190032CE3A /* Exceptions for "SwiftTetris_RP" folder in "SwiftTetris_RPTests" target */,
+				30D4389A2DA83F190032CE3A /* Exceptions for "SwiftTetris_RP" folder in "SwiftTetris_RPUITests" target */,
+			);
 			path = SwiftTetris_RP;
 			sourceTree = "<group>";
 		};
@@ -397,9 +424,14 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 5JVSN3RCY7;
 				GENERATE_INFOPLIST_FILE = YES;
+				"GENERATE_INFOPLIST_FILE[sdk=*]" = YES;
+				INFOPLIST_FILE = "SwiftTetris-RP-Info.plist";
+				"INFOPLIST_FILE[sdk=*]" = "";
+				INFOPLIST_KEY_CFBundleDisplayName = "";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.puzzle-games";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
-				INFOPLIST_KEY_UIMainStoryboardFile = Main;
+				INFOPLIST_KEY_UILaunchStoryboardName = "Launch Screen";
+				INFOPLIST_KEY_UIMainStoryboardFile = Animate_LaunchScreen;
 				INFOPLIST_KEY_UIStatusBarHidden = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -425,9 +457,12 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 5JVSN3RCY7;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "SwiftTetris-RP-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.puzzle-games";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
-				INFOPLIST_KEY_UIMainStoryboardFile = Main;
+				INFOPLIST_KEY_UILaunchStoryboardName = "Launch Screen";
+				INFOPLIST_KEY_UIMainStoryboardFile = Animate_LaunchScreen;
 				INFOPLIST_KEY_UIStatusBarHidden = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";

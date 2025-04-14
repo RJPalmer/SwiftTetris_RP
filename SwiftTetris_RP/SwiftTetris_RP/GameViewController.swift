@@ -11,36 +11,45 @@ import GameplayKit
 
 class GameViewController: UIViewController {
 
-    override func viewDidLoad() {
+    private var hasShownSplash = false
+    
+    override func viewDidLoad(){
         super.viewDidLoad()
-        
-        // Load 'GameScene.sks' as a GKScene. This provides gameplay related content
-        // including entities and graphs.
+        startGameScene()
+    }
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        //startGameScene()
+//        if !hasShownSplash {
+//                hasShownSplash = true
+//
+//                let splash = SplashView(frame: view.bounds)
+//                view.addSubview(splash)
+//
+//                splash.startAnimation {
+//                    self.startGameScene()
+//                }
+//            } else {
+//                startGameScene()
+//        }
+    }
+
+    private func startGameScene() {
         if let scene = GKScene(fileNamed: "GameScene") {
-            
-            // Get the SKScene from the loaded GKScene
             if let sceneNode = scene.rootNode as! GameScene? {
-                
-                // Copy gameplay related content over to the scene
                 sceneNode.entities = scene.entities
                 sceneNode.graphs = scene.graphs
-                
-                // Set the scale mode to scale to fit the window
                 sceneNode.scaleMode = .aspectFill
-                
-                // Present the scene
-                if let view = self.view as! SKView? {
-                    view.presentScene(sceneNode)
-                    
-                    view.ignoresSiblingOrder = true
-                    
-                    view.showsFPS = true
-                    view.showsNodeCount = true
+
+                if let skView = self.view as? SKView {
+                    skView.ignoresSiblingOrder = true
+                    skView.showsFPS = true
+                    skView.showsNodeCount = true
+                    skView.presentScene(sceneNode)
                 }
             }
         }
     }
-
     override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
         if UIDevice.current.userInterfaceIdiom == .phone {
             return .allButUpsideDown
@@ -49,6 +58,11 @@ class GameViewController: UIViewController {
         }
     }
 
+    override func loadView() {
+            // Make the root view an SKView so SpriteKit can render
+            self.view = SKView()
+        }
+    
     override var prefersStatusBarHidden: Bool {
         return true
     }
