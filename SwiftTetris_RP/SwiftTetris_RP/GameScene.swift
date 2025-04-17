@@ -42,7 +42,6 @@ class GameScene: SKScene {
         }
     }
     
-    
     func touchDown(atPoint pos : CGPoint) {
         if let n = self.spinnyNode?.copy() as! SKShapeNode? {
             n.position = pos
@@ -86,7 +85,6 @@ class GameScene: SKScene {
     override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
         for t in touches { self.touchUp(atPoint: t.location(in: self)) }
     }
-    
     
     override func update(_ currentTime: TimeInterval) {
         // Called before each frame is rendered
