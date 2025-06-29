@@ -24,28 +24,86 @@ class GameScene: SKScene {
     private var pauseMenu: SKNode?
     private var blurNode: SKEffectNode?
     
+    private var gameplayPaused = false
+    private let gameplayContainer = SKNode()
+    
+    private let numRows = 20
+    private let numCols = 10
+    private let minimumCellSize: CGFloat = 24.0
+    
+    private var gridNodes: [[SKSpriteNode?]] = []
+    
     override func sceneDidLoad() {
 
         self.lastUpdateTime = 0
         
-        // Get label node from scene and store it for use later
-        self.label = self.childNode(withName: "//helloLabel") as? SKLabelNode
-        self.basicSquare = self.childNode(withName: "//basicSquare") as? SKShapeNode
+        addChild(gameplayContainer)
+        
+        // Get label node from gameplayContainer and store it for use later
+        self.label = gameplayContainer.childNode(withName: "//helloLabel") as? SKLabelNode
+        self.basicSquare = gameplayContainer.childNode(withName: "//basicSquare") as? SKShapeNode
         self.pauseButton = self.childNode(withName: "//pauseButton") as? SKShapeNode
         self.pauseLabel = self.childNode(withName: "//pauseLabel") as? SKLabelNode
-        
-        // Create shape node to use during mouse interaction
+
+        // Create shape node to use during mouse interaction and add to gameplayContainer
         let w = (self.size.width + self.size.height) * 0.05
-        self.spinnyNode = SKShapeNode.init(rectOf: CGSize.init(width: w, height: w), cornerRadius: w * 0.3)
+        let spinny = SKShapeNode(rectOf: CGSize(width: w, height: w), cornerRadius: w * 0.3)
+        self.spinnyNode = spinny
+        gameplayContainer.addChild(spinny)
+
+        // Prepare nextShape and scoreArea under gameplayContainer if they exist
+        if let next = self.childNode(withName: "//nextShape") as? SKShapeNode {
+            nextShape = next
+            next.removeFromParent()
+            gameplayContainer.addChild(next)
+        }
+        if let score = self.childNode(withName: "//scoreArea") as? SKShapeNode {
+            scoreArea = score
+            score.removeFromParent()
+            gameplayContainer.addChild(score)
+        }
         
 //        if let spinnyNode = self.spinnyNode {
 //            spinnyNode.lineWidth = 2.5
-//            
+//
 //            spinnyNode.run(SKAction.repeatForever(SKAction.rotate(byAngle: CGFloat(Double.pi), duration: 1)))
 //            spinnyNode.run(SKAction.sequence([SKAction.wait(forDuration: 0.5),
 //                                              SKAction.fadeOut(withDuration: 0.5),
 //                                              SKAction.removeFromParent()]))
 //        }
+        setupTetrisGrid()
+    }
+    
+    private func setupTetrisGrid() {
+        guard let basicSquare = basicSquare else {
+            print("Error: basicSquare not found in scene.")
+            return
+        }
+
+        // Add uniform padding around the grid inside basicSquare
+        let paddingRatio: CGFloat = 0.05
+        let insetX = basicSquare.frame.width * paddingRatio
+        let insetY = basicSquare.frame.height * paddingRatio
+        let insetRect = basicSquare.frame.insetBy(dx: insetX, dy: insetY)
+
+        let cellWidth = insetRect.width / CGFloat(numCols)
+        let cellHeight = insetRect.height / CGFloat(numRows)
+
+        // Clear old nodes if necessary
+        gridNodes.removeAll()
+
+        for row in 0..<numRows {
+            var rowArray: [SKSpriteNode?] = []
+            for col in 0..<numCols {
+                let block = SKSpriteNode(color: .darkGray, size: CGSize(width: cellWidth - 1, height: cellHeight - 1))
+                let x = insetRect.minX + CGFloat(col) * cellWidth + cellWidth / 2
+                let y = insetRect.minY + CGFloat(row) * cellHeight + cellHeight / 2
+                block.position = CGPoint(x: x, y: y)
+                gameplayContainer.addChild(block)
+                rowArray.append(block)
+            }
+            gridNodes.append(rowArray)
+        }
     }
     
     func touchDown(atPoint pos : CGPoint) {
@@ -61,10 +119,11 @@ class GameScene: SKScene {
     }
     
     func handlePause() {
-        isPaused.toggle()
-        print("Game is now \(isPaused ? "paused" : "resumed")")
+        gameplayPaused.toggle()
+        gameplayContainer.isPaused = gameplayPaused
+        print("Game is now \(gameplayPaused ? "paused" : "resumed")")
 
-        if isPaused {
+        if gameplayPaused {
             showPauseMenu()
         } else {
             pauseMenu?.removeFromParent()
@@ -85,7 +144,7 @@ class GameScene: SKScene {
 //                handlePause()
 //                return
 //            }
-//            
+//
             if let pause = pauseButton, pause.contains(location){
                 handlePause()
                 return
