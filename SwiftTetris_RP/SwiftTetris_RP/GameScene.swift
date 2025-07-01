@@ -32,6 +32,9 @@ class GameScene: SKScene {
     private let minimumCellSize: CGFloat = 24.0
     
     private var gridNodes: [[SKSpriteNode?]] = []
+    private var lockedBlocks: [[SKSpriteNode?]] = []
+    
+    private var activeTetromino: Tetromino?
     
     override func sceneDidLoad() {
 
@@ -72,6 +75,7 @@ class GameScene: SKScene {
 //                                              SKAction.removeFromParent()]))
 //        }
         setupTetrisGrid()
+        spawnTetromino()
     }
     
     private func setupTetrisGrid() {
@@ -104,6 +108,71 @@ class GameScene: SKScene {
             }
             gridNodes.append(rowArray)
         }
+        lockedBlocks = Array(repeating: Array(repeating: nil, count: numCols), count: numRows)
+    }
+    
+    private func spawnTetromino() {
+        activeTetromino?.remove(from: gameplayContainer)
+
+        let type = TetrominoType.allCases.randomElement()!
+        let origin = (row: type.spawnOffsetRow, col: numCols / 2)
+
+        for (dx, dy) in type.blocks {
+            let row = origin.row + dy
+            let col = origin.col + dx
+
+            if row >= 0 && row < numRows && col >= 0 && col < numCols {
+                if lockedBlocks[row][col] != nil {
+                    handleGameOver()
+                    return
+                }
+            }
+        }
+
+        activeTetromino = Tetromino(type: type, origin: origin, grid: gridNodes, container: gameplayContainer)
+    }
+    
+    private func canMoveTetrominoDown() -> Bool {
+        guard let tetromino = activeTetromino else { return false }
+
+        for (dx, dy) in tetromino.type.blocks {
+            let newRow = tetromino.origin.row + dy - 1
+            let col = tetromino.origin.col + dx
+
+            if newRow < 0 || newRow >= numRows || col < 0 || col >= numCols {
+                return false
+            }
+
+            if lockedBlocks[newRow][col] != nil {
+                return false
+            }
+        }
+
+        return true
+    }
+
+    private func moveTetrominoDown() {
+        let fallDistance = gridNodes[0][0]?.size.height ?? 0
+        if canMoveTetrominoDown() {
+            activeTetromino?.moveDown(by: fallDistance)
+        } else {
+            lockTetromino()
+            spawnTetromino()
+        }
+    }
+    
+    private func lockTetromino() {
+        guard let tetromino = activeTetromino else { return }
+
+        for (index, (dx, dy)) in tetromino.type.blocks.enumerated() {
+            let row = tetromino.origin.row + dy
+            let col = tetromino.origin.col + dx
+            if row >= 0 && row < numRows && col >= 0 && col < numCols && index < tetromino.blocks.count {
+                lockedBlocks[row][col] = tetromino.blocks[index]
+            }
+        }
+
+        activeTetromino = nil
     }
     
     func touchDown(atPoint pos : CGPoint) {
@@ -134,7 +203,7 @@ class GameScene: SKScene {
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         for t in touches {
             let location = t.location(in: self)
-
+            
             if let node = self.atPoint(location) as? SKLabelNode, node.name == "resumeButton" {
                 handlePause()
                 return
@@ -148,6 +217,17 @@ class GameScene: SKScene {
             if let pause = pauseButton, pause.contains(location){
                 handlePause()
                 return
+            }
+
+            // Left/right movement control
+            let screenMidX = self.frame.midX
+            let isLeftSide = location.x < screenMidX
+            let isRightSide = location.x > screenMidX
+            let cellWidth = gridNodes[0][0]?.size.width ?? 0
+            if isLeftSide {
+                activeTetromino?.moveHorizontally(by: -1, cellWidth: cellWidth, numCols: numCols)
+            } else if isRightSide {
+                activeTetromino?.moveHorizontally(by: 1, cellWidth: cellWidth, numCols: numCols)
             }
 
             touchDown(atPoint: location)
@@ -184,6 +264,12 @@ class GameScene: SKScene {
         // Update entities
         for entity in self.entities {
             entity.update(deltaTime: dt)
+        }
+        
+        fallTimer += dt
+        if fallTimer >= fallInterval {
+            fallTimer = 0
+            moveTetrominoDown()
         }
         
         self.lastUpdateTime = currentTime
@@ -226,5 +312,31 @@ class GameScene: SKScene {
         menu.position = CGPoint(x: frame.midX, y: frame.midY)
         addChild(menu)
         pauseMenu = menu
+    }
+    
+    private var fallTimer: TimeInterval = 0
+    private let fallInterval: TimeInterval = 0.5
+    private func handleGameOver() {
+        print("Game Over!")
+        gameplayPaused = true
+        gameplayContainer.isPaused = true
+
+        let label = SKLabelNode(text: "GAME OVER")
+        label.fontName = "Courier-Bold"
+        label.fontSize = 32
+        label.fontColor = .red
+        label.position = CGPoint(x: frame.midX, y: frame.midY)
+        label.zPosition = 2000
+        addChild(label)
+    }
+}
+
+extension TetrominoType {
+    var spawnOffsetRow: Int {
+        switch self {
+        case .I: return 20 - 4
+        case .O: return 20 - 2
+        case .T, .L, .J, .S, .Z: return 20 - 3
+        }
     }
 }
