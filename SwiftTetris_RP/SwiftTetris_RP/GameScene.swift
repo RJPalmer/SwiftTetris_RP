@@ -141,7 +141,7 @@ class GameScene: SKScene {
     private func canMoveTetrominoDown() -> Bool {
         guard let tetromino = activeTetromino else { return false }
 
-        for (dx, dy) in tetromino.type.blocks {
+        for (dx, dy) in tetromino.offsets {
             let newRow = tetromino.origin.row + dy - 1
             let col = tetromino.origin.col + dx
 
@@ -170,7 +170,7 @@ class GameScene: SKScene {
     private func lockTetromino() {
         guard let tetromino = activeTetromino else { return }
 
-        for (index, (dx, dy)) in tetromino.type.blocks.enumerated() {
+        for (index, (dx, dy)) in tetromino.offsets.enumerated() {
             let row = tetromino.origin.row + dy
             let col = tetromino.origin.col + dx
             if row >= 0 && row < numRows && col >= 0 && col < numCols && index < tetromino.blocks.count {
@@ -179,6 +179,39 @@ class GameScene: SKScene {
         }
 
         activeTetromino = nil
+        clearCompletedLines()
+    }
+
+    // Clear completed lines, shift down, and update grid
+    private func clearCompletedLines() {
+        var newLockedBlocks: [[SKShapeNode?]] = Array(
+            repeating: Array(repeating: nil, count: numCols),
+            count: numRows
+        )
+
+        var newRow = 0
+        for row in 0..<numRows {
+            let isComplete = lockedBlocks[row].allSatisfy { $0 != nil }
+
+            if !isComplete {
+                newLockedBlocks[newRow] = lockedBlocks[row]
+
+                for col in 0..<numCols {
+                    if let node = newLockedBlocks[newRow][col] {
+                        if let targetBlock = gridNodes[newRow][col] {
+                            node.position = targetBlock.position
+                        }
+                    }
+                }
+                newRow += 1
+            } else {
+                for col in 0..<numCols {
+                    lockedBlocks[row][col]?.removeFromParent()
+                }
+            }
+        }
+
+        lockedBlocks = newLockedBlocks
     }
     
     func touchDown(atPoint pos : CGPoint) {
