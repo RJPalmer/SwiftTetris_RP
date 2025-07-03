@@ -37,7 +37,7 @@ enum TetrominoType: CaseIterable {
 
 class Tetromino {
     let type: TetrominoType
-    var blocks: [SKSpriteNode] = []
+    var blocks: [SKShapeNode] = []
     var origin: (row: Int, col: Int)
 
     init(type: TetrominoType, origin: (row: Int, col: Int), grid: [[SKSpriteNode?]], container: SKNode) {
@@ -50,11 +50,15 @@ class Tetromino {
             guard row < grid.count, col >= 0, col < grid[0].count,
                   let baseBlock = grid[row][col] else { continue }
 
-            let newBlock = SKSpriteNode(color: type.color, size: baseBlock.size)
-            newBlock.position = baseBlock.position
-            newBlock.zPosition = 10
-            container.addChild(newBlock)
-            blocks.append(newBlock)
+            let blockSize = baseBlock.size
+            let shape = SKShapeNode(rectOf: blockSize)
+            shape.fillColor = type.color
+            shape.strokeColor = .black
+            shape.lineWidth = 1
+            shape.position = baseBlock.position
+            shape.zPosition = 10
+            container.addChild(shape)
+            blocks.append(shape)
         }
     }
 

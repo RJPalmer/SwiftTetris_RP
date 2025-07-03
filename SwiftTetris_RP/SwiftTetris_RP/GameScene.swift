@@ -32,7 +32,7 @@ class GameScene: SKScene {
     private let minimumCellSize: CGFloat = 24.0
     
     private var gridNodes: [[SKSpriteNode?]] = []
-    private var lockedBlocks: [[SKSpriteNode?]] = []
+    private var lockedBlocks: [[SKShapeNode?]] = []
     
     private var activeTetromino: Tetromino?
     
@@ -78,6 +78,12 @@ class GameScene: SKScene {
         spawnTetromino()
     }
     
+    @objc private func handleSwipe(_ gesture: UISwipeGestureRecognizer) {
+        if gesture.direction == .down {
+            // removed fast dropping behavior
+        }
+    }
+    
     private func setupTetrisGrid() {
         guard let basicSquare = basicSquare else {
             print("Error: basicSquare not found in scene.")
@@ -108,7 +114,7 @@ class GameScene: SKScene {
             }
             gridNodes.append(rowArray)
         }
-        lockedBlocks = Array(repeating: Array(repeating: nil, count: numCols), count: numRows)
+        lockedBlocks = Array(repeating: Array<SKShapeNode?>(repeating: nil, count: numCols), count: numRows)
     }
     
     private func spawnTetromino() {
