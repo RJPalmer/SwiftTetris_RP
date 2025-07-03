@@ -39,10 +39,12 @@ class Tetromino {
     let type: TetrominoType
     var blocks: [SKShapeNode] = []
     var origin: (row: Int, col: Int)
+    var offsets: [(Int, Int)]
 
     init(type: TetrominoType, origin: (row: Int, col: Int), grid: [[SKSpriteNode?]], container: SKNode) {
         self.type = type
         self.origin = origin
+        self.offsets = type.blocks
 
         for (dx, dy) in type.blocks {
             let row = origin.row + dy
@@ -71,7 +73,7 @@ class Tetromino {
 
     func moveHorizontally(by offset: Int, cellWidth: CGFloat, numCols: Int) {
         let newCol = origin.col + offset
-        for (dx, _) in type.blocks {
+        for (dx, _) in offsets {
             let targetCol = newCol + dx
             if targetCol < 0 || targetCol >= numCols {
                 return

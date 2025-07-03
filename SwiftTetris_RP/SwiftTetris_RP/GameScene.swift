@@ -225,6 +225,16 @@ class GameScene: SKScene {
                 return
             }
 
+            // Tetromino rotation: tap directly on any block of the active tetromino
+            if let blocks = activeTetromino?.blocks {
+                for block in blocks {
+                    if block.contains(location) {
+                        rotateTetromino()
+                        return
+                    }
+                }
+            }
+
             // Left/right movement control
             let screenMidX = self.frame.midX
             let isLeftSide = location.x < screenMidX
@@ -243,6 +253,38 @@ class GameScene: SKScene {
 //            label.run(SKAction.init(named: "Pulse")!, withKey: "fadeInOut")
 //        }
     }
+
+    // Tetromino rotation logic
+    private func rotateTetromino() {
+        guard let tetromino = activeTetromino else { return }
+
+        let origin = tetromino.origin
+        // Use tetromino.offsets instead of tetromino.type.blocks
+        let newOffsets = tetromino.offsets.map { (x, y) in (-y, x) }
+        var newPositions: [(row: Int, col: Int)] = []
+
+        for (dx, dy) in newOffsets {
+            let newRow = origin.row + dy
+            let newCol = origin.col + dx
+
+            if newRow < 0 || newRow >= numRows || newCol < 0 || newCol >= numCols {
+                return // out of bounds
+            }
+            if lockedBlocks[newRow][newCol] != nil {
+                return // collides
+            }
+            newPositions.append((newRow, newCol))
+        }
+
+        for (i, position) in newPositions.enumerated() {
+            if let targetBlock = gridNodes[position.row][position.col] {
+                tetromino.blocks[i].position = targetBlock.position
+            }
+        }
+
+        // Apply rotated offsets
+        tetromino.offsets = newOffsets
+    }
     
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
         for t in touches { self.touchMoved(toPoint: t.location(in: self)) }
@@ -257,27 +299,24 @@ class GameScene: SKScene {
     }
     
     override func update(_ currentTime: TimeInterval) {
-        // Called before each frame is rendered
-        
-        // Initialize _lastUpdateTime if it has not already been
-        if (self.lastUpdateTime == 0) {
+        if gameplayPaused { return }  // Prevent updates while paused
+
+        if self.lastUpdateTime == 0 {
             self.lastUpdateTime = currentTime
         }
-        
-        // Calculate time since last update
+
         let dt = currentTime - self.lastUpdateTime
-        
-        // Update entities
+
         for entity in self.entities {
             entity.update(deltaTime: dt)
         }
-        
+
         fallTimer += dt
         if fallTimer >= fallInterval {
             fallTimer = 0
             moveTetrominoDown()
         }
-        
+
         self.lastUpdateTime = currentTime
     }
     
