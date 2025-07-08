@@ -10,6 +10,8 @@ import GameplayKit
 
 class GameScene: SKScene {
 
+private var scoreManager = GameScoreManager()
+
 required init?(coder aDecoder: NSCoder) {
     super.init(coder: aDecoder)
     print("GameScene: init(coder:) called")
@@ -31,6 +33,8 @@ private var nextShape : SKShapeNode?
 private var scoreArea : SKShapeNode?
 private var pauseButton : SKShapeNode?
 private var pauseLabel: SKLabelNode?
+private var scoreTextLabel: SKLabelNode?
+private var scoreValueLabel: SKLabelNode?
 private var pauseMenu: SKNode?
 private var blurNode: SKEffectNode?
 
@@ -93,6 +97,25 @@ override func sceneDidLoad() {
         scoreArea = score
         score.removeFromParent()
         gameplayContainer.addChild(score)
+    }
+    if let area = scoreArea {
+        scoreTextLabel = SKLabelNode(text: "Score:")
+        scoreTextLabel?.fontName = "Helvetica-Bold"
+        scoreTextLabel?.fontSize = 16
+        scoreTextLabel?.fontColor = .white
+        scoreTextLabel?.horizontalAlignmentMode = .center
+        scoreTextLabel?.verticalAlignmentMode = .bottom
+        scoreTextLabel?.position = CGPoint(x: 0, y: 55) // Align with "Next:"
+        area.addChild(scoreTextLabel!)
+
+        scoreValueLabel = SKLabelNode(text: "0")
+        scoreValueLabel?.fontName = "Helvetica-Bold"
+        scoreValueLabel?.fontSize = 36
+        scoreValueLabel?.fontColor = .white
+        scoreValueLabel?.horizontalAlignmentMode = .center
+        scoreValueLabel?.verticalAlignmentMode = .top
+        scoreValueLabel?.position = CGPoint(x: 0, y: 15) // Align with preview block
+        area.addChild(scoreValueLabel!)
     }
     
 //        if let spinnyNode = self.spinnyNode {
@@ -235,6 +258,10 @@ private func displayNextTetromino() {
     }
 }
 
+    private func updateScoreDisplay() {
+        scoreValueLabel?.text = "\(scoreManager.score)"
+    }
+    
 private func canMoveTetrominoDown() -> Bool {
     guard let tetromino = activeTetromino else { return false }
 
@@ -275,8 +302,12 @@ private func lockTetromino() {
         }
     }
 
+    // Add scoring for tetromino landing
+    scoreManager.addTetrominoLanding()
+
     activeTetromino = nil
     clearCompletedLines()
+    updateScoreDisplay()
 }
 
 // Clear completed lines, shift down, and update grid
@@ -287,12 +318,13 @@ private func clearCompletedLines() {
     )
 
     var newRow = 0
+    var clearCount = 0
     for row in 0..<numRows {
         let isComplete = lockedBlocks[row].allSatisfy { $0 != nil }
 
         if !isComplete {
             newLockedBlocks[newRow] = lockedBlocks[row]
-
+            
             for col in 0..<numCols {
                 if let node = newLockedBlocks[newRow][col] {
                     if let targetBlock = gridNodes[newRow][col] {
@@ -305,10 +337,17 @@ private func clearCompletedLines() {
             for col in 0..<numCols {
                 lockedBlocks[row][col]?.removeFromParent()
             }
+            // Count lines cleared this turn
+           clearCount += 1
+           
+            
         }
     }
+    //let linesClearedThisTurn = newRow - lockedBlocks.count + numRows
+    scoreManager.addLinesCleared(clearCount)
 
     lockedBlocks = newLockedBlocks
+    updateScoreDisplay()
 }
 
 func touchDown(atPoint pos : CGPoint) {
