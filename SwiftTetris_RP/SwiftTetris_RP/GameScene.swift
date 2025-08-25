@@ -164,6 +164,15 @@ private var upcomingTetrominoType: TetrominoType?
             print("Reinitializing scene due to nil basicSquare")
             sceneDidLoad()
         }
+
+        // Configure SKView debug properties based on build configuration
+        #if DEBUG
+        view.showsFPS = true
+        view.showsNodeCount = true
+        #else
+        view.showsFPS = false
+        view.showsNodeCount = false
+        #endif
     }
 
 // MARK: - Grid Setup
@@ -606,3 +615,4 @@ extension TetrominoType {
         }
     }
 }
+
